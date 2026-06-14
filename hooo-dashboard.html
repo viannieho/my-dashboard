@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>圈圈・北極星人生儀表板</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --rose:#C0336D; --rose-l:#D9608E; --rose-p:#FCEEF4; --rose-m:#F0BDCF;
+  --ink:#1A0D12; --ink-m:#3D1A28; --muted:#8A5C70; --bg:#FDF6F9; --white:#FFFFFF;
+  --ok:#4A9B6F; --warn:#C87C2A; --err:#B83232;
+  --self:#7B5EA7; --family:#E07B54; --business:#C0336D; --influence:#2E86AB; --wealth:#4A9B6F;
+  --bnav-h: 60px;
+  --bnav-safe: calc(60px + env(safe-area-inset-bottom));
+}
+html{ height: -webkit-fill-available; }
+body{
+  font-family:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+}
+button,input,select{font-family:inherit;}
+button{cursor:pointer;}
+
+/* ── PAGES ── */
+.page{ display:none; }
+.page.active{
+  display:block;
+  padding-bottom: var(--bnav-safe);
+}
+
+
+
+
+/* ── NORTH STAR HEADER ── */
+.ns-header{
+  background:linear-gradient(160deg,#c0336d 0%,#a02858 50%,#7a1a3e 100%);
+  padding:28px 20px 24px; position:relative; overflow:hidden;
+}
+.ns-header::before{
+  content:''; position:absolute; top:-40px; right:-40px;
+  width:200px; height:200px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,0.15) 0%,transparent 70%);
+}
+.ns-mission{font-size:10px;font-weight:700;letter-spacing:0.15em;color:rgba(255,255,255,0.75);margin-bottom:6px;}
+.ns-title{font-size:22px;font-weight:900;color:var(--white);line-height:1.2;margin-bottom:4px;}
+.ns-tagline{font-size:11px;color:rgba(255,255,255,0.65);font-style:italic;margin-bottom:22px;}
+
+/* North Star Metric */
+.nsm-box{
+  background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+  border-radius:16px; padding:16px 18px; margin-bottom:18px;
+  backdrop-filter:blur(8px);
+}
+.nsm-label{font-size:10px;color:rgba(255,255,255,0.75);font-weight:700;letter-spacing:0.1em;margin-bottom:8px;}
+.nsm-value{font-size:36px;font-weight:900;color:var(--white);line-height:1;}
+.nsm-sub{font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px;}
+.nsm-bar-bg{height:6px;border-radius:99px;background:rgba(255,255,255,0.25);margin-top:10px;overflow:hidden;}
+.nsm-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0.6),var(--white));transition:width 0.8s ease;}
+
+/* 5 pillars summary */
+.pillars-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.pillar-mini{
+  background:rgba(255,255,255,0.15); border-radius:12px; padding:10px 8px;
+  text-align:center; border:1px solid rgba(255,255,255,0.25); cursor:pointer;
+}
+.pillar-mini:hover{background:rgba(255,255,255,0.25);}
+.pillar-mini .icon{font-size:18px;display:block;margin-bottom:4px;}
+.pillar-mini .pct{font-size:14px;font-weight:800;display:block;}
+.pillar-mini .lbl{font-size:9px;color:rgba(255,255,255,0.7);display:block;margin-top:2px;}
+
+/* ── SECTION HEADER ── */
+.section-hdr{
+  padding:18px 18px 6px; display:flex; align-items:center;
+  justify-content:space-between;
+}
+.section-hdr h2{font-size:16px;font-weight:800;color:var(--ink);}
+.section-hdr .add-btn{
+  background:var(--rose); border:none; border-radius:10px;
+  padding:7px 14px; color:var(--white); font-size:12px; font-weight:700;
+}
+
+/* ── BREAKTHROUGH SCORE ── */
+.score-card{
+  margin:0 16px 16px; background:var(--white); border-radius:16px;
+  padding:20px; box-shadow:0 2px 14px rgba(192,51,109,0.08);
+  border:1px solid var(--rose-m);
+}
+.score-top{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.score-ring{position:relative;flex-shrink:0;width:80px;height:80px;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-num{
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;
+}
+.score-ring-num .big{font-size:20px;font-weight:900;color:var(--rose);}
+.score-ring-num .sml{font-size:9px;color:var(--muted);}
+.score-info h3{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.score-info p{font-size:11px;color:var(--muted);line-height:1.6;}
+.score-items{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.score-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:10px;background:var(--rose-p);
+  cursor:pointer; border:2px solid transparent; transition:all 0.15s;
+}
+.score-item.checked{background:#e8f5e9;border-color:var(--ok);}
+.score-item .s-icon{font-size:16px;flex-shrink:0;}
+.score-item .s-text{font-size:11px;font-weight:600;color:var(--ink-m);flex:1;}
+.score-item .s-pts{font-size:10px;font-weight:700;color:var(--muted);}
+.score-item.checked .s-pts{color:var(--ok);}
+
+/* ── PILLAR PAGE HEADER ── */
+.pillar-header{
+  padding:24px 20px 20px; position:relative; overflow:hidden;
+}
+.pillar-header .p-icon{font-size:32px;margin-bottom:8px;display:block;}
+.pillar-header h2{font-size:20px;font-weight:900;color:var(--white);margin-bottom:3px;}
+.pillar-header .p-goal{font-size:12px;color:rgba(255,255,255,0.65);}
+.pillar-summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;
+}
+.p-sum-card{
+  background:rgba(255,255,255,0.12);border-radius:12px;padding:12px;
+  border:1px solid rgba(255,255,255,0.15);
+}
+.p-sum-val{font-size:20px;font-weight:900;color:var(--white);}
+.p-sum-lbl{font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;}
+
+/* ── KPI CARDS ── */
+.kpi-list{padding:12px 16px 16px;display:grid;gap:12px;}
+.kpi-card{
+  background:var(--white);border-radius:14px;
+  padding:16px 18px;box-shadow:0 2px 12px rgba(192,51,109,0.07);
+  border:1px solid var(--rose-m); cursor:grab;
+}
+.kpi-card.dragging{opacity:0.4;transform:scale(0.97);}
+.kpi-card.drag-over{border:2px dashed var(--rose);background:var(--rose-p);}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.kpi-name-wrap .kpi-cat{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.kpi-name-wrap .kpi-name{font-size:14px;font-weight:800;color:var(--ink);margin-top:2px;}
+.kpi-btns{display:flex;gap:3px;}
+.kpi-btn{background:none;border:none;font-size:14px;padding:3px 5px;border-radius:6px;opacity:0.45;}
+.kpi-btn:hover{opacity:1;background:var(--rose-p);}
+.kpi-body{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.ring-wrap{position:relative;flex-shrink:0;width:64px;height:64px;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+.kpi-nums{flex:1;}
+.kpi-current{font-size:20px;font-weight:800;color:var(--ink);line-height:1;}
+.kpi-unit{font-size:10px;color:var(--muted);margin-left:3px;}
+.kpi-target{font-size:10px;color:var(--muted);margin-top:2px;}
+.kpi-badge{display:inline-block;margin-top:5px;font-size:9px;font-weight:700;border-radius:20px;padding:2px 9px;}
+.spark-wrap{flex-shrink:0;}
+.spark-lbl{font-size:9px;color:var(--muted);text-align:center;margin-top:2px;}
+.bar-bg{height:5px;border-radius:99px;background:var(--rose-p);overflow:hidden;margin-bottom:8px;}
+.bar-fill{height:100%;border-radius:99px;transition:width 0.8s ease;}
+.dl-row{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--rose-p);border-radius:9px;padding:6px 10px;
+  font-size:10px;color:var(--muted);margin-bottom:8px;
+}
+.dl-weekly{font-size:9px;font-weight:700;color:var(--ink-m);}
+.btn-update{
+  width:100%;padding:7px;border-radius:9px;
+  border:1.5px dashed var(--rose-m);background:transparent;
+  color:var(--muted);font-size:11px;font-weight:600;
+}
+.btn-update:hover{background:var(--rose-p);color:var(--rose);}
+.drag-hint{text-align:center;font-size:10px;color:var(--muted);padding:4px 0 0;opacity:0.7;}
+
+/* ── MODALS ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(26,13,18,0.6);
+  display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;
+}
+.modal{
+  background:var(--white);border-radius:20px;padding:26px 22px;
+  width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(192,51,109,0.22);
+}
+.modal h3{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:18px;}
+.form-grid{display:grid;gap:12px;}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.f-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.05em;display:block;margin-bottom:4px;}
+.f-input{
+  width:100%;padding:9px 12px;border-radius:10px;
+  border:1.5px solid var(--rose-m);font-size:13px;color:var(--ink);outline:none;
+}
+.f-input:focus{border-color:var(--rose);}
+.f-select{
+  width:100%;padding:9px 12px;border-radius:10px;
+  border:1.5px solid var(--rose-m);font-size:13px;color:var(--ink);
+  outline:none;background:var(--white);
+}
+.icon-picker{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.icon-opt{font-size:18px;padding:5px 7px;border-radius:8px;border:2px solid var(--rose-m);background:var(--white);cursor:pointer;}
+.icon-opt.active{border-color:var(--rose);background:var(--rose-p);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-pri{flex:1;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--rose),var(--rose-l));color:var(--white);font-size:13px;font-weight:700;}
+.btn-sec{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--rose-m);background:var(--white);color:var(--ink-m);font-size:13px;font-weight:600;}
+
+/* cat order rows */
+.cat-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:var(--rose-p);margin-bottom:6px;font-size:13px;font-weight:600;color:var(--ink);}
+.cat-row-name{flex:1;}
+.cat-mv-btn{background:var(--white);border:1.5px solid var(--rose-m);border-radius:7px;width:28px;height:28px;font-size:12px;cursor:pointer;color:var(--rose);flex-shrink:0;}
+.cat-mv-btn:disabled{opacity:0.2;cursor:default;}
+
+/* label rows */
+.lbl-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rose-p);}
+.lbl-row:last-child{border-bottom:none;}
+.lbl-key{font-size:11px;color:var(--muted);width:72px;flex-shrink:0;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--ink);color:var(--white);padding:9px 20px;border-radius:20px;
+  font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  transition:transform 0.3s ease;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--rose-m);
+  display:flex;z-index:500;
+  box-shadow:0 -4px 20px rgba(192,51,109,0.08);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bnav-btn{
+  flex:1;padding:10px 4px 8px;border:none;background:none;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--muted);font-size:9px;font-weight:700;
+}
+.bnav-btn .b-icon{font-size:20px;}
+.bnav-btn.active{color:var(--rose);}
+
+/* Sort bar */
+.sort-bar{
+  padding:10px 16px 4px;display:flex;align-items:center;gap:7px;
+  flex-wrap:wrap;
+}
+.sort-btn{
+  padding:5px 12px;border-radius:14px;font-size:11px;font-weight:600;
+  border:1.5px solid var(--rose-m);background:var(--white);color:var(--muted);
+}
+.sort-btn.active{background:var(--rose);border-color:var(--rose);color:var(--white);}
+.sort-actions{margin-left:auto;display:flex;gap:5px;}
+.sort-actions .sort-btn{color:var(--rose);border-color:var(--rose);}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+
+
+<!-- ══════════════════════════════════════
+  PAGE 1：北極星首頁
+══════════════════════════════════════ -->
+<div class="page active" id="page-north-star">
+
+  <div class="ns-header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="ns-mission">圈圈・北極星人生儀表板</div>
+      <div id="today-date" style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:600;text-align:right;line-height:1.5"></div>
+    </div>
+    <div class="ns-title">向上破圈，從今天開始</div>
+    <div class="ns-tagline">只要向前行，人生總有無限可能。</div>
+
+    <!-- 北極星核心指標 -->
+    <div class="nsm-box">
+      <div class="nsm-label">🌟 北極星指標 · 今年幫助多少人完成向上破圈</div>
+      <div class="nsm-value" id="ns-helped">0 <span style="font-size:16px;font-weight:500;opacity:0.6">/ 30 位</span></div>
+      <div class="nsm-sub">每一位都是你影響力的延伸</div>
+      <div class="nsm-bar-bg"><div class="nsm-bar-fill" id="ns-bar" style="width:0%"></div></div>
+    </div>
+
+    <!-- 5 pillars -->
+    <div class="pillars-grid" id="pillars-grid"></div>
+  </div>
+
+  <!-- 破圈指數 -->
+  <div style="padding:16px 16px 4px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:13px;font-weight:800;color:var(--ink)">⚡ 破圈指數</div>
+    <!-- 月份切換 -->
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="changeScoreMonth(-1)" style="background:none;border:1.5px solid var(--rose-m);border-radius:8px;padding:3px 9px;font-size:14px;color:var(--rose);cursor:pointer">‹</button>
+      <span id="score-month-lbl" style="font-size:12px;font-weight:700;color:var(--muted);min-width:64px;text-align:center"></span>
+      <button onclick="changeScoreMonth(1)" id="score-next-btn" style="background:none;border:1.5px solid var(--rose-m);border-radius:8px;padding:3px 9px;font-size:14px;color:var(--rose);cursor:pointer">›</button>
+    </div>
+  </div>
+  <!-- 歷史提示 -->
+  <div id="score-history-note" style="display:none;margin:0 16px 4px;padding:7px 12px;background:#fff8e1;border-radius:9px;font-size:11px;color:#7a5900;border:1px solid #f0c040">
+    📅 查看中：<span id="score-history-month"></span> 的破圈紀錄（唯讀）
+  </div>
+  <div class="score-card">
+    <div class="score-top">
+      <div class="score-ring">
+        <svg width="80" height="80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="var(--rose-p)" stroke-width="8"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="var(--rose)" stroke-width="8"
+            stroke-dasharray="0 201" stroke-linecap="round" id="score-arc"
+            transform="rotate(-90 40 40)" style="transition:stroke-dasharray 0.8s ease"/>
+        </svg>
+        <div class="score-ring-num">
+          <span class="big" id="score-num">0</span>
+          <span class="sml">/ 100</span>
+        </div>
+      </div>
+      <div class="score-info">
+        <h3>破圈指數</h3>
+        <p id="score-info-sub">每完成一項破圈行動得 10 分<br>滿分 100 分・每月重置<br>歷史紀錄永久保留 ✓</p>
+      </div>
+    </div>
+    <div class="score-items" id="score-items"></div>
+  </div>
+
+  <!-- 快速行動 -->
+  <div class="section-hdr">
+    <h2>📋 全部目標一覽</h2>
+    <button class="add-btn" onclick="openAddModal()">＋ 新增</button>
+  </div>
+
+  <!-- All KPIs mini view -->
+  <div style="padding:0 16px 16px" id="ns-kpi-mini"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+  PAGE: 五大面向（共用模板）
+══════════════════════════════════════ -->
+<div class="page" id="page-self">
+  <div class="pillar-header" style="background:linear-gradient(135deg,#3d1a5e,var(--self))">
+    <span class="p-icon">🧘</span>
+    <h2>Self · 自己</h2>
+    <div class="p-goal">目標：持續向上破圈</div>
+    <div class="pillar-summary" id="self-summary"></div>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-btn active" id="self-sort-custom" onclick="setPillarSort('self','custom')">自訂</button>
+    <button class="sort-btn" id="self-sort-pct" onclick="setPillarSort('self','pct')">達成率</button>
+    <div class="sort-actions">
+      <button class="sort-btn" onclick="openCatOrderModal('self')">☰ 類別</button>
+      <button class="sort-btn" onclick="openAddModal('self')">＋ 新增</button>
+    </div>
+  </div>
+  <div class="kpi-list" id="self-kpi-list"></div>
+</div>
+
+<div class="page" id="page-family">
+  <div class="pillar-header" style="background:linear-gradient(135deg,#7a2e10,var(--family))">
+    <span class="p-icon">👨‍👩‍👦</span>
+    <h2>Family · 家庭</h2>
+    <div class="p-goal">目標：與家人一起成長</div>
+    <div class="pillar-summary" id="family-summary"></div>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-btn active" id="family-sort-custom" onclick="setPillarSort('family','custom')">自訂</button>
+    <button class="sort-btn" id="family-sort-pct" onclick="setPillarSort('family','pct')">達成率</button>
+    <div class="sort-actions">
+      <button class="sort-btn" onclick="openCatOrderModal('family')">☰ 類別</button>
+      <button class="sort-btn" onclick="openAddModal('family')">＋ 新增</button>
+    </div>
+  </div>
+  <div class="kpi-list" id="family-kpi-list"></div>
+</div>
+
+<div class="page" id="page-business">
+  <div class="pillar-header" style="background:linear-gradient(135deg,#5a1535,var(--business))">
+    <span class="p-icon">💼</span>
+    <h2>Business · 事業</h2>
+    <div class="p-goal">目標：建立好圈圈生態圈</div>
+    <div class="pillar-summary" id="business-summary"></div>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-btn active" id="business-sort-custom" onclick="setPillarSort('business','custom')">自訂</button>
+    <button class="sort-btn" id="business-sort-pct" onclick="setPillarSort('business','pct')">達成率</button>
+    <div class="sort-actions">
+      <button class="sort-btn" onclick="openCatOrderModal('business')">☰ 類別</button>
+      <button class="sort-btn" onclick="openAddModal('business')">＋ 新增</button>
+    </div>
+  </div>
+  <div class="kpi-list" id="business-kpi-list"></div>
+</div>
+
+<div class="page" id="page-influence">
+  <div class="pillar-header" style="background:linear-gradient(135deg,#0d3a52,var(--influence))">
+    <span class="p-icon">📡</span>
+    <h2>Influence · 影響力</h2>
+    <div class="p-goal">目標：放大影響力</div>
+    <div class="pillar-summary" id="influence-summary"></div>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-btn active" id="influence-sort-custom" onclick="setPillarSort('influence','custom')">自訂</button>
+    <button class="sort-btn" id="influence-sort-pct" onclick="setPillarSort('influence','pct')">達成率</button>
+    <div class="sort-actions">
+      <button class="sort-btn" onclick="openCatOrderModal('influence')">☰ 類別</button>
+      <button class="sort-btn" onclick="openAddModal('influence')">＋ 新增</button>
+    </div>
+  </div>
+  <div class="kpi-list" id="influence-kpi-list"></div>
+</div>
+
+<div class="page" id="page-wealth">
+  <div class="pillar-header" style="background:linear-gradient(135deg,#1a3d28,var(--wealth))">
+    <span class="p-icon">💰</span>
+    <h2>Wealth · 財富</h2>
+    <div class="p-goal">目標：財務自由與資產累積</div>
+    <div class="pillar-summary" id="wealth-summary"></div>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-btn active" id="wealth-sort-custom" onclick="setPillarSort('wealth','custom')">自訂</button>
+    <button class="sort-btn" id="wealth-sort-pct" onclick="setPillarSort('wealth','pct')">達成率</button>
+    <div class="sort-actions">
+      <button class="sort-btn" onclick="openCatOrderModal('wealth')">☰ 類別</button>
+      <button class="sort-btn" onclick="openAddModal('wealth')">＋ 新增</button>
+    </div>
+  </div>
+  <div class="kpi-list" id="wealth-kpi-list"></div>
+</div>
+
+
+<!-- ══ BOTTOM NAV ══ -->
+<div class="bottom-nav">
+  <button class="bnav-btn active" onclick="gotoPage('north-star')" id="bnav-north-star"><span class="b-icon">🌟</span>北極星</button>
+  <button class="bnav-btn" onclick="gotoPage('self')" id="bnav-self"><span class="b-icon">🧘</span>Self</button>
+  <button class="bnav-btn" onclick="gotoPage('family')" id="bnav-family"><span class="b-icon">👨‍👩‍👦</span>Family</button>
+  <button class="bnav-btn" onclick="gotoPage('business')" id="bnav-business"><span class="b-icon">💼</span>Business</button>
+  <button class="bnav-btn" onclick="gotoPage('influence')" id="bnav-influence"><span class="b-icon">📡</span>Influence</button>
+  <button class="bnav-btn" onclick="gotoPage('wealth')" id="bnav-wealth"><span class="b-icon">💰</span>Wealth</button>
+</div>
+
+
+<!-- ══ MODAL: 新增/編輯 KPI ══ -->
+<div class="overlay" id="modal-kpi" style="display:none">
+  <div class="modal">
+    <h3 id="modal-kpi-title">＋ 新增目標</h3>
+    <div class="form-grid">
+      <div>
+        <label class="f-label">面向</label>
+        <select class="f-select" id="f-pillar">
+          <option value="self">🧘 Self・自己</option>
+          <option value="family">👨‍👩‍👦 Family・家庭</option>
+          <option value="business">💼 Business・事業</option>
+          <option value="influence">📡 Influence・影響力</option>
+          <option value="wealth">💰 Wealth・財富</option>
+        </select>
+      </div>
+      <div>
+        <label class="f-label">子類別</label>
+        <input class="f-input" id="f-category" placeholder="健康、學習、收入…">
+      </div>
+      <div>
+        <label class="f-label">目標名稱</label>
+        <input class="f-input" id="f-name" placeholder="打高爾夫">
+      </div>
+      <div class="form-row2">
+        <div>
+          <label class="f-label">目標值</label>
+          <input class="f-input" id="f-target" type="number" placeholder="12">
+        </div>
+        <div>
+          <label class="f-label">目前值</label>
+          <input class="f-input" id="f-current" type="number" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row2">
+        <div>
+          <label class="f-label">單位</label>
+          <input class="f-input" id="f-unit" placeholder="次、元、位…">
+        </div>
+        <div>
+          <label class="f-label">截止日期</label>
+          <input class="f-input" id="f-deadline" type="date">
+        </div>
+      </div>
+      <div>
+        <label class="f-label">圖示</label>
+        <div class="icon-picker" id="icon-picker"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sec" onclick="closeModal('modal-kpi')">取消</button>
+      <button class="btn-pri" onclick="saveKPI()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: 更新進度 ══ -->
+<div class="overlay" id="modal-update" style="display:none">
+  <div class="modal" style="max-width:340px">
+    <h3>📝 更新進度</h3>
+    <div id="update-name" style="color:var(--muted);font-size:13px;margin-bottom:6px"></div>
+
+    <!-- 進度條預覽 -->
+    <div style="background:var(--rose-p);border-radius:10px;padding:12px 14px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+        <span id="upd-current-lbl">目前：0</span>
+        <span id="upd-target-lbl">目標：0</span>
+      </div>
+      <div style="height:7px;border-radius:99px;background:rgba(192,51,109,0.15);overflow:hidden">
+        <div id="upd-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--rose-l));transition:width 0.3s ease;width:0%"></div>
+      </div>
+      <div id="upd-pct" style="text-align:center;font-size:16px;font-weight:800;color:var(--rose);margin-top:8px">0%</div>
+    </div>
+
+    <!-- ± 步進器 -->
+    <label class="f-label" id="update-unit-lbl" style="margin-bottom:10px;display:block">調整數值</label>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button onclick="stepVal(-updStep)" style="width:48px;height:48px;border-radius:12px;border:1.5px solid var(--rose-m);background:var(--white);font-size:22px;font-weight:700;color:var(--rose)">－</button>
+      <input id="f-update-val" type="number" oninput="onUpdInput()"
+        style="flex:1;text-align:center;font-size:22px;font-weight:800;padding:10px;border-radius:12px;border:1.5px solid var(--rose-m);color:var(--ink);outline:none">
+      <button onclick="stepVal(updStep)" style="width:48px;height:48px;border-radius:12px;border:none;background:var(--rose);font-size:22px;font-weight:700;color:var(--white)">＋</button>
+    </div>
+
+    <!-- 快速步進選擇 -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:7px">每次增減</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap" id="step-btns"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sec" onclick="closeModal('modal-update')">取消</button>
+      <button class="btn-pri" onclick="confirmUpdate()">確認儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: 類別順序 ══ -->
+<div class="overlay" id="modal-cat-order" style="display:none">
+  <div class="modal" style="max-width:340px">
+    <h3>☰ 類別順序</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">點 ▲ ▼ 調整順序</p>
+    <div id="cat-order-list"></div>
+    <div class="modal-actions">
+      <button class="btn-sec" onclick="closeModal('modal-cat-order')">取消</button>
+      <button class="btn-pri" onclick="saveCatOrder()">儲存</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════
+const LS_KEY = 'hooo_ns_v1';
+const ICONS  = ['⛳','🏋️','🧘','🌙','💧','📖','📝','📈','💑','👨‍👩‍👦','📚','💰','💬','📸','👥','🎤','✨','🤝','🗺️','🌟','🏆','📡','🎯','💡','🎪','🏌️','📱','🎓','🤖','⭐'];
+const PILLARS = ['self','family','business','influence','wealth'];
+const PILLAR_COLOR = {self:'var(--self)',family:'var(--family)',business:'var(--business)',influence:'var(--influence)',wealth:'var(--wealth)'};
+const PILLAR_ICON  = {self:'🧘',family:'👨‍👩‍👦',business:'💼',influence:'📡',wealth:'💰'};
+const PILLAR_NAME  = {self:'Self',family:'Family',business:'Business',influence:'Influence',wealth:'Wealth'};
+
+const SCORE_ITEMS = [
+  {key:'new_person',  label:'認識更高層級的人', icon:'🤝'},
+  {key:'new_skill',   label:'學習新能力',       icon:'🎓'},
+  {key:'new_collab',  label:'創造新合作',       icon:'🤲'},
+  {key:'comfort_zone',label:'走出舒適圈',       icon:'🚀'},
+  {key:'income_up',   label:'提升收入',         icon:'💰'},
+  {key:'helped_more', label:'幫助更多人',       icon:'💫'},
+  {key:'new_content', label:'創造新內容',       icon:'✍️'},
+  {key:'influence_up',label:'擴大影響力',       icon:'📡'},
+  {key:'new_circle',  label:'進入新圈層',       icon:'⭕'},
+  {key:'big_win',     label:'完成重大挑戰',     icon:'🏆'},
+];
+
+const DEFAULT_DATA = {
+  version: 1,
+  northStar: { helped: 0, target: 30 },
+  scoreChecked: {},
+  pillarSorts: { self:'custom', family:'custom', business:'custom', influence:'custom', wealth:'custom' },
+  catOrders: { self:[], family:[], business:[], influence:[], wealth:[] },
+  sheetsUrl: '',
+  kpis: [
+    // Self
+    {id:1,  pillar:'self', category:'健康運動', name:'打高爾夫',      target:12,  current:0, unit:'次', icon:'⛳', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:2,  pillar:'self', category:'健康運動', name:'提臀運動',      target:260, current:0, unit:'次', icon:'🏋️', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:3,  pillar:'self', category:'健康運動', name:'每天伸展5分鐘', target:365, current:0, unit:'天', icon:'🧘', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:4,  pillar:'self', category:'健康運動', name:'11點前入睡',    target:365, current:0, unit:'天', icon:'🌙', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:5,  pillar:'self', category:'健康運動', name:'每天喝水3000cc',target:365, current:0, unit:'天', icon:'💧', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:6,  pillar:'self', category:'個人成長', name:'每天看書15分鐘',target:365, current:0, unit:'天', icon:'📖', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:7,  pillar:'self', category:'個人成長', name:'每天寫複盤',    target:365, current:0, unit:'天', icon:'📝', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    // Family
+    {id:8,  pillar:'family', category:'夫妻關係', name:'每天讚美老公（3句）',   target:365, current:0, unit:'天', icon:'💑', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:9,  pillar:'family', category:'親子關係', name:'每天鼓勵兒子（3句）',   target:365, current:0, unit:'天', icon:'👨‍👩‍👦', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:10, pillar:'family', category:'親子關係', name:'陪兒子唸英文（每週3次）',target:156, current:0, unit:'次', icon:'📚', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    // Business
+    {id:11, pillar:'business', category:'營收',   name:'年度總營業額',  target:600000, current:0, unit:'元',  icon:'💰', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:12, pillar:'business', category:'活動',   name:'企業講座',      target:2,      current:0, unit:'場',  icon:'🎤', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:13, pillar:'business', category:'活動',   name:'高爾夫活動',    target:6,      current:0, unit:'場',  icon:'⛳', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:14, pillar:'business', category:'活動',   name:'形象美學活動',  target:6,      current:0, unit:'場',  icon:'✨', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:15, pillar:'business', category:'客戶',   name:'免費諮詢',      target:30,     current:0, unit:'位',  icon:'🤝', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:16, pillar:'business', category:'客戶',   name:'個人形象地圖',  target:30,     current:0, unit:'位',  icon:'🗺️', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:17, pillar:'business', category:'客戶',   name:'打造個人品牌',  target:6,      current:0, unit:'位',  icon:'🌟', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    // Influence
+    {id:18, pillar:'influence', category:'社群',  name:'Line官方粉絲',  target:300,    current:0, unit:'位',  icon:'💬', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:19, pillar:'influence', category:'社群',  name:'IG粉絲',        target:1000,   current:0, unit:'位',  icon:'📸', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    {id:20, pillar:'influence', category:'社群',  name:'FB粉絲',        target:1000,   current:0, unit:'位',  icon:'👥', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+    // Wealth
+    {id:21, pillar:'wealth', category:'投資',    name:'週一到週五買股票', target:261, current:0, unit:'次', icon:'📈', deadline:'2026-12-31', history:[{d:'2026-06-14',v:0}]},
+  ]
+};
+
+// ── State ──────────────────────────────────────
+let S = {};
+let editingId   = null;
+let updatingId  = null;
+let selectedIcon = '⛳';
+let dragSrcId    = null;
+let catOrderPillar = null;
+let tempCatOrder   = [];
+let currentPage    = 'north-star';
+
+// ── Storage ────────────────────────────────────
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    S = saved.version === 1 ? saved : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch { S = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+}
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(S));
+}
+
+// ── Helpers ────────────────────────────────────
+const pct   = (c,t) => Math.min(100, Math.round((c/t)*100));
+const scol  = (p)   => p>=80 ? 'var(--ok)' : p>=50 ? 'var(--warn)' : 'var(--err)';
+const slbl  = (p)   => p>=80 ? '達標中 ✓' : p>=50 ? '進行中' : '需加速';
+const today = ()    => new Date().toISOString().slice(0,10);
+const fmtN  = (n,u) => (u==='元'&&n>=10000) ? `${(n/10000).toFixed(1)}萬` : Number(n).toLocaleString('zh-TW');
+
+function daysLeft(dl) {
+  if (!dl) return null;
+  return Math.ceil((new Date(dl) - new Date()) / 86400000);
+}
+function weeklyNeeded(k) {
+  const dl = daysLeft(k.deadline);
+  if (!dl||dl<=0) return null;
+  const gap = k.target - k.current;
+  if (gap<=0) return 0;
+  return Math.ceil(gap / (dl/7));
+}
+function pillarKpis(p) { return S.kpis.filter(k=>k.pillar===p); }
+function pillarPct(p) {
+  const ks = pillarKpis(p);
+  if (!ks.length) return 0;
+  return Math.round(ks.reduce((s,k)=>s+pct(k.current,k.target),0)/ks.length);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── Sparkline ──────────────────────────────────
+function spark(history, color) {
+  if (!history||history.length<2) return '';
+  const vals = history.map(h=>h.v||0);
+  const min=Math.min(...vals), max=Math.max(...vals), range=max-min||1;
+  const W=100,H=30,pad=3;
+  const pts = vals.map((v,i)=>{
+    const x=pad+(i/(vals.length-1))*(W-pad*2);
+    const y=H-pad-((v-min)/range)*(H-pad*2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lx=pad+(W-pad*2), lv=vals[vals.length-1];
+  const ly=H-pad-((lv-min)/range)*(H-pad*2);
+  return `<svg width="${W}" height="${H}" style="overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="${color}"/>
+  </svg>`;
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+function gotoPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(el=>el.classList.remove('active'));
+  const pg = document.getElementById('page-'+p);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el=>{
+    if(el.textContent.toLowerCase().includes(p.replace('-',''))||
+       (p==='north-star'&&el.textContent.includes('北極星'))) el.classList.add('active');
+  });
+  const bn = document.getElementById('bnav-'+p);
+  if (bn) bn.classList.add('active');
+  renderPage(p);
+}
+
+// ════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════
+function renderAll() {
+  renderNorthStar();
+  PILLARS.forEach(renderPillar);
+}
+
+function renderPage(p) {
+  if (p==='north-star') renderNorthStar();
+  else if (PILLARS.includes(p)) renderPillar(p);
+}
+
+// ── North Star ─────────────────────────────────
+function renderNorthStar() {
+  // Today's date
+  const dateEl = document.getElementById('today-date');
+  if (dateEl) {
+    const now = new Date();
+    const weekdays = ['日','一','二','三','四','五','六'];
+    dateEl.innerHTML = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日<br>星期${weekdays[now.getDay()]}`;
+  }
+
+  // Month nav
+  const am = activeMonth();
+  const isCur = isCurrentMonth();
+  const mlbl = document.getElementById('score-month-lbl');
+  if (mlbl) mlbl.textContent = isCur ? '本月' : fmtMonth(am);
+  const nextBtn = document.getElementById('score-next-btn');
+  if (nextBtn) nextBtn.style.opacity = isCur ? '0.3' : '1';
+  const note = document.getElementById('score-history-note');
+  const noteMonth = document.getElementById('score-history-month');
+  if (note) note.style.display = isCur ? 'none' : 'block';
+  if (noteMonth) noteMonth.textContent = fmtMonth(am);
+
+  // NS metric
+  const h = S.northStar.helped, t = S.northStar.target;
+  const el = document.getElementById('ns-helped');
+  if (el) el.innerHTML = `${h} <span style="font-size:16px;font-weight:500;opacity:0.6">/ ${t} 位</span>`;
+  const bar = document.getElementById('ns-bar');
+  if (bar) bar.style.width = pct(h,t)+'%';
+
+  // 5 pillars mini
+  const pg = document.getElementById('pillars-grid');
+  if (pg) pg.innerHTML = PILLARS.map(p=>{
+    const pp = pillarPct(p);
+    const col = pp>=80?'#4A9B6F':pp>=50?'#C87C2A':'#C4547E';
+    return `<div class="pillar-mini" onclick="gotoPage('${p}')">
+      <span class="icon">${PILLAR_ICON[p]}</span>
+      <span class="pct" style="color:var(--white)">${pp}%</span>
+      <span class="lbl">${PILLAR_NAME[p]}</span>
+    </div>`;
+  }).join('');
+
+  // Score — use activeMonth
+  const checked = S.scoreChecked[am]||{};
+  const score = Object.keys(checked).filter(k=>checked[k]).length * 10;
+  const arc = document.getElementById('score-arc');
+  if (arc) arc.setAttribute('stroke-dasharray', `${(score/100)*201} 201`);
+  const sn = document.getElementById('score-num');
+  if (sn) sn.textContent = score;
+
+  const si = document.getElementById('score-items');
+  if (si) si.innerHTML = SCORE_ITEMS.map(item=>{
+    const done = checked[item.key];
+    // past months: show readonly (no onclick)
+    const clickable = isCur ? `onclick="toggleScore('${item.key}')"` : '';
+    const opacity   = !isCur && !done ? 'opacity:0.45;' : '';
+    return `<div class="score-item ${done?'checked':''}" ${clickable} style="cursor:${isCur?'pointer':'default'};${opacity}">
+      <span class="s-icon">${item.icon}</span>
+      <span class="s-text">${item.label}</span>
+      <span class="s-pts">${done ? '✓ +10' : isCur ? '＋10' : '—'}</span>
+    </div>`;
+  }).join('');
+
+  // Mini KPI list (all)
+  const mini = document.getElementById('ns-kpi-mini');
+  if (!mini) return;
+  const byPillar = {};
+  PILLARS.forEach(p=>{ byPillar[p]=S.kpis.filter(k=>k.pillar===p); });
+  mini.innerHTML = PILLARS.map(p=>{
+    const ks = byPillar[p];
+    if (!ks.length) return '';
+    return `<div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:${PILLAR_COLOR[p]};margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        ${PILLAR_ICON[p]} ${PILLAR_NAME[p]}
+        <span style="font-size:10px;font-weight:500;color:var(--muted)">· ${pillarPct(p)}% 達成</span>
+      </div>
+      ${ks.map(k=>{
+        const p2=pct(k.current,k.target), col=scol(p2);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--white);border-radius:10px;margin-bottom:6px;border:1px solid var(--rose-m)">
+          <span style="font-size:16px">${k.icon}</span>
+          <span style="flex:1;font-size:12px;font-weight:600;color:var(--ink)">${k.name}</span>
+          <span style="font-size:11px;color:${col};font-weight:700">${p2}%</span>
+          <div style="width:50px;height:5px;border-radius:99px;background:var(--rose-p);overflow:hidden">
+            <div style="width:${p2}%;height:100%;border-radius:99px;background:${col}"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+let viewingMonth = ''; // '' = this month
+
+function thisMonth() { return new Date().toISOString().slice(0,7); }
+
+function activeMonth() { return viewingMonth || thisMonth(); }
+
+function isCurrentMonth() { return activeMonth() === thisMonth(); }
+
+function changeScoreMonth(dir) {
+  const base = activeMonth();
+  const [y, m] = base.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  const newMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  // don't go into future
+  if (newMonth > thisMonth()) return;
+  viewingMonth = newMonth === thisMonth() ? '' : newMonth;
+  renderNorthStar();
+}
+
+function fmtMonth(ym) {
+  const [y, m] = ym.split('-');
+  const names = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  return `${y} ${names[+m-1]}`;
+}
+
+function toggleScore(key) {
+  if (!isCurrentMonth()) return; // 歷史月份唯讀
+  const m = thisMonth();
+  if (!S.scoreChecked[m]) S.scoreChecked[m] = {};
+  S.scoreChecked[m][key] = !S.scoreChecked[m][key];
+  saveState();
+  renderNorthStar();
+}
+
+// ── Pillar Page ────────────────────────────────
+function renderPillar(p) {
+  const ks = getOrderedKpis(p);
+
+  // summary
+  const sum = document.getElementById(p+'-summary');
+  if (sum) {
+    const avg = ks.length ? Math.round(ks.reduce((s,k)=>s+pct(k.current,k.target),0)/ks.length) : 0;
+    const done = ks.filter(k=>pct(k.current,k.target)>=80).length;
+    const need = ks.filter(k=>pct(k.current,k.target)<50).length;
+    sum.innerHTML = [
+      {v:`${avg}%`, l:'整體達成率'},
+      {v:`${done}/${ks.length}`, l:'達標項目'},
+      {v:`${need} 項`, l:'需加速'},
+    ].map(s=>`<div class="p-sum-card"><div class="p-sum-val">${s.v}</div><div class="p-sum-lbl">${s.l}</div></div>`).join('');
+  }
+
+  // KPI list
+  const list = document.getElementById(p+'-kpi-list');
+  if (!list) return;
+  if (!ks.length) { list.innerHTML = '<div class="empty">尚無目標，點右上角新增！</div>'; return; }
+
+  const sort = S.pillarSorts[p]||'custom';
+  list.innerHTML = ks.map(k=>kpiCardHTML(k)).join('') +
+    (sort==='custom' ? '<div class="drag-hint">☰ 長按卡片可拖拉換順序</div>' : '');
+
+  if (sort==='custom') initDrag(p);
+}
+
+function getOrderedKpis(p) {
+  const sort = S.pillarSorts[p]||'custom';
+  const ks   = S.kpis.filter(k=>k.pillar===p);
+  if (sort==='pct')  return [...ks].sort((a,b)=>pct(b.current,b.target)-pct(a.current,a.target));
+  if (sort==='name') return [...ks].sort((a,b)=>a.name.localeCompare(b.name,'zh-TW'));
+  return ks;
+}
+
+function setPillarSort(p, s) {
+  S.pillarSorts[p] = s;
+  ['custom','pct'].forEach(k=>{
+    const el = document.getElementById(`${p}-sort-${k}`);
+    if (el) el.classList.toggle('active', k===s);
+  });
+  saveState();
+  renderPillar(p);
+}
+
+// ── KPI Card ───────────────────────────────────
+function kpiCardHTML(k) {
+  const p2  = pct(k.current, k.target);
+  const col = scol(p2);
+  const R=64,S2=7,r=(R-S2)/2,circ=2*Math.PI*r,dash=(p2/100)*circ;
+  const dl  = daysLeft(k.deadline);
+  const wk  = weeklyNeeded(k);
+
+  const dlRow = k.deadline ? `
+    <div class="dl-row">
+      <span>📅 ${k.deadline}
+        <span style="margin-left:5px;font-weight:700;color:${dl<=14?'var(--err)':'var(--muted)'}">
+          ${dl>0?`還有 ${dl} 天`:'已到期'}
+        </span>
+      </span>
+      <span class="dl-weekly">${wk===0?'🎉 達標！':wk?`每週 +${fmtN(wk,k.unit)}`:''}</span>
+    </div>` : '';
+
+  return `<div class="kpi-card" data-id="${k.id}" data-pillar="${k.pillar}">
+    <div class="kpi-top">
+      <div class="kpi-name-wrap">
+        <div class="kpi-cat">${k.category}</div>
+        <div class="kpi-name">${k.icon} ${k.name}</div>
+      </div>
+      <div class="kpi-btns">
+        <button class="kpi-btn" onclick="openEditModal(${k.id})">✏️</button>
+        <button class="kpi-btn" onclick="deleteKPI(${k.id})">🗑️</button>
+      </div>
+    </div>
+    <div class="kpi-body">
+      <div class="ring-wrap">
+        <svg width="${R}" height="${R}">
+          <circle cx="${R/2}" cy="${R/2}" r="${r}" fill="none" stroke="var(--rose-p)" stroke-width="${S2}"/>
+          <circle cx="${R/2}" cy="${R/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${S2}"
+            stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-linecap="round"
+            transform="rotate(-90 ${R/2} ${R/2})"/>
+        </svg>
+        <div class="ring-pct" style="color:${col}">${p2}%</div>
+      </div>
+      <div class="kpi-nums">
+        <div class="kpi-current">${fmtN(k.current,k.unit)}<span class="kpi-unit">${k.unit}</span></div>
+        <div class="kpi-target">目標 ${fmtN(k.target,k.unit)} ${k.unit}</div>
+        <div class="kpi-badge" style="color:${col};background:${col}22">${slbl(p2)}</div>
+      </div>
+      <div class="spark-wrap">${spark(k.history,col)}<div class="spark-lbl">趨勢</div></div>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${p2}%;background:linear-gradient(90deg,var(--rose-l),${col})"></div></div>
+    ${dlRow}
+    <button class="btn-update" onclick="openUpdateModal(${k.id})">📝 更新進度</button>
+  </div>`;
+}
+
+// ── Drag & Drop ────────────────────────────────
+function initDrag(pillar) {
+  document.querySelectorAll(`#${pillar}-kpi-list .kpi-card[data-id]`).forEach(card=>{
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',function(e){ dragSrcId=+this.dataset.id; this.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+    card.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('drag-over'); });
+    card.addEventListener('dragleave',function(){ this.classList.remove('drag-over'); });
+    card.addEventListener('drop',     function(e){
+      e.preventDefault(); this.classList.remove('drag-over');
+      const tgt = +this.dataset.id;
+      if (dragSrcId===tgt) return;
+      const si = S.kpis.findIndex(k=>k.id===dragSrcId);
+      const ti = S.kpis.findIndex(k=>k.id===tgt);
+      const moved = S.kpis.splice(si,1)[0];
+      S.kpis.splice(ti,0,moved);
+      saveState(); renderPillar(pillar);
+    });
+    card.addEventListener('dragend', function(){ document.querySelectorAll('.kpi-card').forEach(c=>c.classList.remove('dragging','drag-over')); });
+  });
+}
+
+// ════════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════════
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+
+function buildIconPicker(sel) {
+  selectedIcon = sel||'⛳';
+  document.getElementById('icon-picker').innerHTML = ICONS.map(ic=>
+    `<button class="icon-opt ${ic===selectedIcon?'active':''}" onclick="selIcon('${ic}')">${ic}</button>`
+  ).join('');
+}
+function selIcon(ic) {
+  selectedIcon=ic;
+  document.querySelectorAll('.icon-opt').forEach(b=>b.classList.toggle('active',b.textContent===ic));
+}
+
+function openAddModal(defaultPillar) {
+  editingId = null;
+  document.getElementById('modal-kpi-title').textContent = '＋ 新增目標';
+  ['category','name','target','current','unit'].forEach(f=>document.getElementById('f-'+f).value='');
+  document.getElementById('f-deadline').value = '2026-12-31';
+  if (defaultPillar) document.getElementById('f-pillar').value = defaultPillar;
+  buildIconPicker('⛳');
+  document.getElementById('modal-kpi').style.display='flex';
+}
+
+function openEditModal(id) {
+  const k = S.kpis.find(x=>x.id===id); if(!k) return;
+  editingId = id;
+  document.getElementById('modal-kpi-title').textContent = '✏️ 編輯目標';
+  document.getElementById('f-pillar').value   = k.pillar;
+  document.getElementById('f-category').value = k.category;
+  document.getElementById('f-name').value     = k.name;
+  document.getElementById('f-target').value   = k.target;
+  document.getElementById('f-current').value  = k.current;
+  document.getElementById('f-unit').value     = k.unit;
+  document.getElementById('f-deadline').value = k.deadline||'';
+  buildIconPicker(k.icon);
+  document.getElementById('modal-kpi').style.display='flex';
+}
+
+function saveKPI() {
+  const pillar = document.getElementById('f-pillar').value;
+  const cat    = document.getElementById('f-category').value.trim();
+  const name   = document.getElementById('f-name').value.trim();
+  const tgt    = +document.getElementById('f-target').value;
+  const cur    = +document.getElementById('f-current').value;
+  const unit   = document.getElementById('f-unit').value.trim();
+  const dl     = document.getElementById('f-deadline').value;
+  if (!name||!tgt) { showToast('⚠️ 請填寫名稱與目標值'); return; }
+
+  if (editingId) {
+    S.kpis = S.kpis.map(k=>k.id===editingId
+      ? {...k, pillar, category:cat, name, target:tgt, current:cur, unit, deadline:dl, icon:selectedIcon}
+      : k);
+    showToast('✅ 目標已更新');
+  } else {
+    const newId = Date.now();
+    S.kpis.push({id:newId, pillar, category:cat, name, target:tgt, current:cur, unit, deadline:dl, icon:selectedIcon, history:[{d:today(),v:cur}]});
+    showToast('✅ 目標已新增');
+  }
+  closeModal('modal-kpi');
+  saveState();
+  renderAll();
+  sheetsWrite(editingId ? {action:'edit',id:editingId,pillar,category:cat,name,target:tgt,current:cur,unit,deadline:dl,icon:selectedIcon}
+                        : {action:'add',...S.kpis[S.kpis.length-1]});
+}
+
+let updStep = 1;
+let updTarget = 0;
+
+function openUpdateModal(id) {
+  const k = S.kpis.find(x=>x.id===id); if(!k) return;
+  updatingId = id;
+  updTarget  = k.target;
+  updStep    = smartStep(k.target, k.unit);
+
+  document.getElementById('update-name').textContent = k.icon+' '+k.name;
+  document.getElementById('update-unit-lbl').textContent = `調整數值（${k.unit}）`;
+  document.getElementById('f-update-val').value = k.current;
+
+  // step options based on unit/target
+  const steps = smartStepOptions(k.target, k.unit);
+  document.getElementById('step-btns').innerHTML = steps.map(s=>
+    `<button onclick="setStep(${s})" id="stepbtn-${s}"
+      style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;
+        border:1.5px solid ${s===updStep?'var(--rose)':'var(--rose-m)'};
+        background:${s===updStep?'var(--rose)':'var(--white)'};
+        color:${s===updStep?'var(--white)':'var(--muted)'}">
+      ±${fmtN(s,k.unit)}
+    </button>`
+  ).join('');
+
+  updateUpdPreview(k.current, k.target);
+  document.getElementById('modal-update').style.display='flex';
+}
+
+function smartStep(target, unit) {
+  if (unit==='元') return target>=100000 ? 10000 : 1000;
+  if (target>=100) return 10;
+  if (target>=20)  return 1;
+  return 1;
+}
+function smartStepOptions(target, unit) {
+  if (unit==='元') return [1000,5000,10000,50000];
+  if (target>=200) return [1,5,10,20];
+  if (target>=50)  return [1,2,5,10];
+  return [1,2,3,5];
+}
+
+function setStep(s) {
+  updStep = s;
+  const k = S.kpis.find(x=>x.id===updatingId);
+  if (!k) return;
+  const steps = smartStepOptions(k.target, k.unit);
+  steps.forEach(v => {
+    const btn = document.getElementById('stepbtn-'+v);
+    if (!btn) return;
+    btn.style.borderColor = v===s ? 'var(--rose)' : 'var(--rose-m)';
+    btn.style.background  = v===s ? 'var(--rose)' : 'var(--white)';
+    btn.style.color       = v===s ? 'var(--white)' : 'var(--muted)';
+  });
+}
+
+function stepVal(delta) {
+  const inp = document.getElementById('f-update-val');
+  const k   = S.kpis.find(x=>x.id===updatingId);
+  const newVal = Math.max(0, (+inp.value||0) + delta);
+  inp.value = newVal;
+  updateUpdPreview(newVal, k ? k.target : updTarget);
+}
+
+function onUpdInput() {
+  const inp = document.getElementById('f-update-val');
+  const k   = S.kpis.find(x=>x.id===updatingId);
+  updateUpdPreview(+inp.value||0, k ? k.target : updTarget);
+}
+
+function updateUpdPreview(cur, tgt) {
+  const p = pct(cur, tgt);
+  const col = scol(p);
+  const bar = document.getElementById('upd-bar');
+  const pctEl = document.getElementById('upd-pct');
+  const curLbl = document.getElementById('upd-current-lbl');
+  const tgtLbl = document.getElementById('upd-target-lbl');
+  const k = S.kpis.find(x=>x.id===updatingId);
+  const unit = k ? k.unit : '';
+  if (bar)    { bar.style.width=p+'%'; bar.style.background=`linear-gradient(90deg,var(--rose-l),${col})`; }
+  if (pctEl)  { pctEl.textContent=p+'%'; pctEl.style.color=col; }
+  if (curLbl) curLbl.textContent = `目前：${fmtN(cur,unit)} ${unit}`;
+  if (tgtLbl) tgtLbl.textContent = `目標：${fmtN(tgt,unit)} ${unit}`;
+}
+
+function confirmUpdate() {
+  const v = +document.getElementById('f-update-val').value;
+  S.kpis = S.kpis.map(k=>{
+    if (k.id!==updatingId) return k;
+    const hist=[...(k.history||[])];
+    const td=today();
+    if (hist.length&&hist[hist.length-1].d===td) hist[hist.length-1].v=v;
+    else hist.push({d:td,v});
+    return {...k,current:v,history:hist};
+  });
+  const k = S.kpis.find(x=>x.id===updatingId);
+  showToast(`📈 ${k.name} → ${fmtN(v,k.unit)} ${k.unit}`);
+  closeModal('modal-update');
+  saveState(); renderAll();
+  sheetsWrite({action:'update',id:updatingId,current:v});
+}
+
+function deleteKPI(id) {
+  if (!confirm('確定刪除這個目標？')) return;
+  sheetsWrite({action:'delete',id});
+  S.kpis = S.kpis.filter(k=>k.id!==id);
+  saveState(); showToast('🗑️ 已刪除'); renderAll();
+}
+
+// ── Category Order ─────────────────────────────
+function openCatOrderModal(p) {
+  catOrderPillar = p;
+  const cats = getOrderedCats(p);
+  tempCatOrder = [...cats];
+  renderCatList();
+  document.getElementById('modal-cat-order').style.display='flex';
+}
+function getOrderedCats(p) {
+  const all = Array.from(new Set(S.kpis.filter(k=>k.pillar===p).map(k=>k.category)));
+  const ord = (S.catOrders[p]||[]).filter(c=>all.includes(c));
+  return [...ord, ...all.filter(c=>!ord.includes(c))];
+}
+function renderCatList() {
+  document.getElementById('cat-order-list').innerHTML = tempCatOrder.map((c,i)=>`
+    <div class="cat-row">
+      <span class="cat-row-name">${c}</span>
+      <button class="cat-mv-btn" onclick="moveCat(${i},-1)" ${i===0?'disabled':''}>▲</button>
+      <button class="cat-mv-btn" onclick="moveCat(${i},1)" ${i===tempCatOrder.length-1?'disabled':''}>▼</button>
+    </div>`).join('');
+}
+function moveCat(i,d) {
+  const j=i+d;
+  if(j<0||j>=tempCatOrder.length) return;
+  [tempCatOrder[i],tempCatOrder[j]]=[tempCatOrder[j],tempCatOrder[i]];
+  renderCatList();
+}
+function saveCatOrder() {
+  S.catOrders[catOrderPillar] = [...tempCatOrder];
+  saveState(); closeModal('modal-cat-order');
+  showToast('✅ 類別順序已儲存');
+  renderPillar(catOrderPillar);
+}
+
+// ════════════════════════════════════════════════
+//  GOOGLE SHEETS
+// ════════════════════════════════════════════════
+async function syncFromSheets() {
+  if (!S.sheetsUrl) { showToast('⚠️ 尚未設定 Sheets URL'); return; }
+  showToast('☁️ 正在同步…');
+  try {
+    const url = S.sheetsUrl + (S.sheetsUrl.includes('?')?'&':'?') + '_t='+Date.now();
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.status!=='ok') throw new Error();
+    const map = {};
+    json.data.forEach(r=>{ map[String(r.id)]=r; });
+    S.kpis = S.kpis.map(k=>{
+      const s=map[String(k.id)]; if(!s) return k;
+      const hist=[...(k.history||[])];
+      const nv=+s.current;
+      if (!hist.length||hist[hist.length-1].v!==nv) hist.push({d:today(),v:nv});
+      return {...k,target:+s.target,current:nv,deadline:s.deadline||k.deadline,history:hist};
+    });
+    saveState(); showToast('✅ 已從 Sheets 同步'); renderAll();
+  } catch { showToast('❌ 同步失敗，請確認設定'); }
+}
+
+async function sheetsWrite(payload) {
+  if (!S.sheetsUrl) return;
+  try {
+    await fetch(S.sheetsUrl, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)});
+  } catch {}
+}
+
+// ════════════════════════════════════════════════
+//  NORTH STAR: update helped count
+// ════════════════════════════════════════════════
+// click on ns-helped to update
+document.addEventListener('click', function(e){
+  if (e.target.id==='ns-helped'||e.target.closest('#ns-helped')) {
+    const v = prompt('今年已幫助破圈人數：', S.northStar.helped);
+    if (v!==null && !isNaN(+v)) {
+      S.northStar.helped = +v;
+      saveState(); renderNorthStar();
+    }
+  }
+});
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+loadState();
+renderAll();
+</script>
+</body>
+</html>
