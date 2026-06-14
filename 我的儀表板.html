@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>圈圈・目標設定儀表板</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --rose:     #C0336D;
+    --rose-l:   #D9608E;
+    --rose-p:   #FCEEF4;
+    --rose-m:   #F0BDCF;
+    --ink:      #1A0D12;
+    --ink-m:    #3D1A28;
+    --muted:    #8A5C70;
+    --bg:       #FDF6F9;
+    --white:    #FFFFFF;
+    --ok:       #4A9B6F;
+    --warn:     #C87C2A;
+    --err:      #B83232;
+    --radius:   14px;
+    --shadow:   0 2px 14px rgba(192,51,109,0.09);
+  }
+  body {
+    font-family: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-m) 55%, var(--rose) 100%);
+    padding: 28px 20px 22px;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .brand-label {
+    color: var(--rose-p);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    margin-bottom: 5px;
+  }
+  .header h1 {
+    color: var(--white);
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .header-tagline {
+    color: var(--rose-m);
+    font-size: 11px;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  .btn-add {
+    background: linear-gradient(135deg, var(--rose), var(--rose-l));
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(155,44,90,0.4);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Summary Cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .summary-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .summary-icon { font-size: 17px; }
+  .summary-value {
+    font-size: 19px;
+    font-weight: 800;
+    margin-top: 4px;
+  }
+  .summary-lbl {
+    color: rgba(255,255,255,0.55);
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  /* ── Header Action Buttons ── */
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-action {
+    flex: 1;
+    padding: 9px;
+    border-radius: 11px;
+    border: 1.5px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .btn-action:hover { background: rgba(255,255,255,0.15); }
+
+  /* ── Sheets Config Banner ── */
+  .sheets-banner {
+    background: #fff8e1;
+    border-bottom: 2px solid #f0c040;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #7a5900;
+  }
+  .sheets-banner.connected {
+    background: #e8f5e9;
+    border-color: var(--ok);
+    color: #1b5e20;
+  }
+  .btn-sheets-cfg {
+    margin-left: auto;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1.5px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── Filter Tabs ── */
+  .filter-bar {
+    padding: 14px 16px 4px;
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1.5px solid var(--rose-m);
+    background: var(--white);
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .filter-btn.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: var(--white);
+  }
+
+  /* ── KPI Grid ── */
+  .kpi-grid {
+    padding: 12px 16px 60px;
+    display: grid;
+    gap: 14px;
+  }
+
+  /* ── KPI Card ── */
+  .kpi-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 18px 18px 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--rose-m);
+  }
+  .kpi-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .kpi-category {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .kpi-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-top: 3px;
+  }
+  .kpi-actions { display: flex; gap: 4px; }
+  .kpi-icon-btn {
+    background: none;
+    border: none;
+    font-size: 15px;
+    padding: 2px 5px;
+    border-radius: 6px;
+    opacity: 0.5;
+  }
+  .kpi-icon-btn:hover { opacity: 1; background: var(--rose-p); }
+
+  /* ring + numbers + spark */
+  .kpi-body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 11px;
+  }
+  .ring-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+  }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+  }
+  .kpi-nums { flex: 1; }
+  .kpi-current {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .kpi-unit {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .kpi-target {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .kpi-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 10px;
+  }
+  .sparkline-wrap { flex-shrink: 0; text-align: center; }
+  .spark-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* progress bar */
+  .kpi-bar-bg {
+    height: 5px;
+    border-radius: 99px;
+    background: var(--rose-p);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .kpi-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s ease;
+  }
+
+  /* deadline row */
+  .kpi-deadline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--rose-p);
+    border-radius: 10px;
+    padding: 7px 11px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .deadline-days { font-weight: 700; margin-left: 6px; }
+  .deadline-weekly { font-size: 10px; font-weight: 700; color: var(--ink-m); }
+
+  /* update btn */
+  .btn-update {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--rose-m);
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .btn-update:hover { background: var(--rose-p); color: var(--rose); }
+
+  /* ── Modals ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,16,24,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 900;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(155,44,90,0.22);
+  }
+  .modal h3 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .form-grid { display: grid; gap: 13px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 9px 13px;
+    border-radius: 10px;
+    border: 1.5px solid var(--rose-m);
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+  }
+  .field-input:focus { border-color: var(--rose); }
+  .icon-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .icon-opt {
+    font-size: 19px;
+    padding: 5px 7px;
+    border-radius: 9px;
+    border: 2px solid var(--rose-m);
+    background: var(--white);
+    cursor: pointer;
+  }
+  .icon-opt.active {
+    border-color: var(--rose);
+    background: var(--rose-p);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--rose), var(--rose-l));
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .btn-secondary {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1.5px solid var(--rose-m);
+    background: var(--white);
+    color: var(--ink-m);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Sheets config modal */
+  .sheets-steps {
+    background: var(--rose-p);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--ink-m);
+  }
+  .sheets-steps strong { color: var(--rose); }
+  .sheets-steps code {
+    background: rgba(155,44,90,0.12);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 11px;
+  }
+
+  /* Report Modal */
+  .report-body {
+    background: var(--rose-p);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--ink-m);
+    white-space: pre-wrap;
+    min-height: 120px;
+  }
+  .loading-spin {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .spinner {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--ink);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="brand-label">圈圈・目標設定儀表板</div>
+      <h1>我的目標追蹤<span id="s-cat-label" style="font-size:13px;font-weight:500;color:var(--rose-m);margin-left:8px"></span></h1>
+      <div class="header-tagline">只要向前行，人生總有無限可能。</div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()">＋ 新增指標</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-icon">🎯</div>
+      <div class="summary-value" id="s-overall" style="color:#C4547E">—</div>
+      <div class="summary-lbl">整體達成率</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-icon">✅</div>
+      <div class="summary-value" id="s-ontrack" style="color:#4A9B6F">—</div>
+      <div class="summary-lbl">達標指標</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-icon">⚡</div>
+      <div class="summary-value" id="s-attn" style="color:#C87C2A">—</div>
+      <div class="summary-lbl">需加速</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button class="btn-action" onclick="openReportModal()">🤖 AI 週報</button>
+    <button class="btn-action" onclick="syncFromSheets()">☁️ 從 Sheets 讀取</button>
+    <button class="btn-action" onclick="exportCSV()">📥 匯出 CSV</button>
+  </div>
+</div>
+
+<!-- Sheets Banner -->
+<div class="sheets-banner" id="sheets-banner">
+  <span>⚙️</span>
+  <span id="sheets-status">尚未連接 Google Sheets</span>
+  <button class="btn-sheets-cfg" onclick="openSheetsModal()">設定連接</button>
+</div>
+
+<!-- Filter Tabs -->
+<div class="filter-bar" id="filter-bar"></div>
+
+<!-- KPI Grid -->
+<div class="kpi-grid" id="kpi-grid"></div>
+
+
+<!-- ══ MODAL: 新增/編輯 KPI ══ -->
+<div class="overlay" id="modal-kpi" style="display:none">
+  <div class="modal">
+    <h3 id="modal-kpi-title">＋ 新增 KPI 指標</h3>
+    <div class="form-grid">
+      <div>
+        <label class="field-label">類別</label>
+        <input class="field-input" id="f-category" placeholder="品牌成長、營收…">
+      </div>
+      <div>
+        <label class="field-label">指標名稱</label>
+        <input class="field-input" id="f-name" placeholder="IG 追蹤人數">
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label class="field-label">目標值</label>
+          <input class="field-input" id="f-target" type="number" placeholder="10000">
+        </div>
+        <div>
+          <label class="field-label">目前值</label>
+          <input class="field-input" id="f-current" type="number" placeholder="6200">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label class="field-label">單位</label>
+          <input class="field-input" id="f-unit" placeholder="人、元、件…">
+        </div>
+        <div>
+          <label class="field-label">截止日期</label>
+          <input class="field-input" id="f-deadline" type="date">
+        </div>
+      </div>
+      <div>
+        <label class="field-label">圖示</label>
+        <div class="icon-picker" id="icon-picker"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-kpi')">取消</button>
+      <button class="btn-primary" onclick="saveKPI()">儲存指標</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: 更新進度 ══ -->
+<div class="overlay" id="modal-update" style="display:none">
+  <div class="modal" style="max-width:360px">
+    <h3>📝 更新進度</h3>
+    <div id="update-kpi-name" style="color:var(--muted);font-size:13px;margin-bottom:18px"></div>
+    <div>
+      <label class="field-label" id="update-unit-label">目前值</label>
+      <input class="field-input" id="f-update-val" type="number">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-update')">取消</button>
+      <button class="btn-primary" onclick="confirmUpdate()">確認更新</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: Google Sheets 設定 ══ -->
+<div class="overlay" id="modal-sheets" style="display:none">
+  <div class="modal">
+    <h3>☁️ 連接 Google Sheets</h3>
+    <div class="sheets-steps">
+      <strong>步驟 1：</strong>開啟你的 Google Sheets，點 <strong>擴充功能 → Apps Script</strong><br>
+      <strong>步驟 2：</strong>貼上下方的 Apps Script 程式碼並部署為 <strong>網頁應用程式</strong>（存取權限：任何人）<br>
+      <strong>步驟 3：</strong>複製部署後的 <strong>網頁應用程式 URL</strong>，貼到下方<br>
+      <strong>步驟 4：</strong>確認 Sheets 中有名為 <code>KPI</code> 的工作表，欄位順序為：<br>
+      <code>id | category | name | target | current | unit | deadline | icon</code>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <label class="field-label">Apps Script 網頁應用程式 URL</label>
+      <input class="field-input" id="f-sheets-url" placeholder="https://script.google.com/macros/s/…/exec">
+    </div>
+
+    <!-- Apps Script 程式碼 -->
+    <details style="margin-bottom:16px">
+      <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--rose);padding:8px 0">
+        📋 點此展開 Apps Script 程式碼（複製貼到 Apps Script）
+      </summary>
+      <div style="position:relative;margin-top:8px">
+        <textarea id="apps-script-code" readonly
+          style="width:100%;height:220px;font-family:monospace;font-size:10px;
+                 padding:12px;border-radius:10px;border:1.5px solid var(--rose-m);
+                 background:#f8f8f8;color:#333;resize:none;line-height:1.5">
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('KPI');
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0];
+  var data = rows.slice(1).filter(function(r){ return r[0] !== ''; }).map(function(row) {
+    var obj = {};
+    headers.forEach(function(h, i) { obj[h] = row[i]; });
+    return obj;
+  });
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', data: data }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('KPI');
+  var payload = JSON.parse(e.postData.contents);
+  var today = new Date().toISOString().slice(0,10);
+
+  // 更新進度（只改 current）
+  if (payload.action === 'update') {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === String(payload.id)) {
+        sheet.getRange(i+1, 5).setValue(payload.current);
+        sheet.getRange(i+1, 9).setValue(today);
+        break;
+      }
+    }
+  }
+
+  // 編輯指標（所有欄位都更新）
+  if (payload.action === 'edit') {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === String(payload.id)) {
+        sheet.getRange(i+1, 1, 1, 9).setValues([[
+          payload.id, payload.category, payload.name,
+          payload.target, payload.current, payload.unit,
+          payload.deadline, payload.icon, today
+        ]]);
+        break;
+      }
+    }
+  }
+
+  // 新增指標
+  if (payload.action === 'add') {
+    sheet.getRange(sheet.getLastRow()+1, 1, 1, 9).setValues([[
+      payload.id, payload.category, payload.name,
+      payload.target, payload.current, payload.unit,
+      payload.deadline, payload.icon, today
+    ]]);
+  }
+
+  // 刪除指標
+  if (payload.action === 'delete') {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === String(payload.id)) {
+        sheet.deleteRow(i+1);
+        break;
+      }
+    }
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+        </textarea>
+        <button onclick="copyScript()" style="position:absolute;top:8px;right:8px;
+          padding:4px 10px;border-radius:7px;border:1.5px solid var(--rose-m);
+          background:var(--white);font-size:10px;font-weight:700;color:var(--rose);cursor:pointer">
+          複製
+        </button>
+      </div>
+    </details>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-sheets')">取消</button>
+      <button class="btn-primary" onclick="saveSheetsCfg()">儲存並測試連線</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: AI 週報 ══ -->
+<div class="overlay" id="modal-report" style="display:none">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="margin:0">🤖 AI 週報摘要</h3>
+      <button onclick="closeModal('modal-report')" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer">✕</button>
+    </div>
+    <div id="report-content">
+      <div class="loading-spin">
+        <span class="spinner">⟳</span>
+        AI 正在分析您的事業數據…
+      </div>
+    </div>
+    <div class="modal-actions" id="report-actions" style="display:none">
+      <button class="btn-secondary" onclick="copyReport()">📋 複製週報</button>
+      <button class="btn-primary" onclick="closeModal('modal-report')">關閉</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ════════════════════════════════════════════════
+//  CONFIG & STATE
+// ════════════════════════════════════════════════
+const LS_KEY   = 'hooo_v3';
+const ICONS    = ['📊','📧','💰','🎓','🤖','⭐','🔑','🏢','📱','🎯','💡','🌟','🏆','📈','👥','🎪'];
+let selectedIcon = '📊';
+let editingId    = null;
+let updatingId   = null;
+let reportText   = '';
+
+const DEFAULT_KPI = [
+  {id:1,category:'品牌成長',name:'IG 追蹤人數',  target:10000,current:6200, unit:'人',  icon:'📊',deadline:'2025-12-31',history:[{d:'2025-06-01',v:5000},{d:'2025-07-01',v:5800},{d:'2025-08-01',v:6200}]},
+  {id:2,category:'品牌成長',name:'Email 名單',    target:3000, current:1850, unit:'人',  icon:'📧',deadline:'2025-12-31',history:[{d:'2025-06-01',v:1200},{d:'2025-07-01',v:1600},{d:'2025-08-01',v:1850}]},
+  {id:3,category:'營收',    name:'月營收',         target:500000,current:182000,unit:'元',icon:'💰',deadline:'2025-12-31',history:[{d:'2025-06-01',v:80000},{d:'2025-07-01',v:130000},{d:'2025-08-01',v:182000}]},
+  {id:4,category:'營收',    name:'線上課程銷售',   target:200,  current:87,   unit:'件', icon:'🎓',deadline:'2025-12-31',history:[{d:'2025-06-01',v:20},{d:'2025-07-01',v:55},{d:'2025-08-01',v:87}]},
+  {id:5,category:'AI系統',  name:'診斷測驗完成率', target:1000, current:340,  unit:'人次',icon:'🤖',deadline:'2025-12-31',history:[{d:'2025-06-01',v:80},{d:'2025-07-01',v:200},{d:'2025-08-01',v:340}]},
+  {id:6,category:'客戶',    name:'高單價客戶',     target:8,    current:5,    unit:'位/月',icon:'⭐',deadline:'2025-12-31',history:[{d:'2025-06-01',v:2},{d:'2025-07-01',v:4},{d:'2025-08-01',v:5}]},
+  {id:7,category:'客戶',    name:'會員訂閱人數',   target:500,  current:128,  unit:'人', icon:'🔑',deadline:'2025-12-31',history:[{d:'2025-06-01',v:40},{d:'2025-07-01',v:90},{d:'2025-08-01',v:128}]},
+  {id:8,category:'企業培訓',name:'企業合約',       target:5,    current:2,    unit:'件', icon:'🏢',deadline:'2025-12-31',history:[{d:'2025-06-01',v:0},{d:'2025-07-01',v:1},{d:'2025-08-01',v:2}]},
+];
+
+// ── State ─────────────────────────────────────
+let state = { kpis: [], sheetsUrl: '', filter: '全部' };
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    state.kpis      = saved.kpis      || DEFAULT_KPI;
+    state.sheetsUrl = saved.sheetsUrl || '';
+    state.filter    = '全部';
+  } catch { state.kpis = DEFAULT_KPI; }
+}
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify({ kpis: state.kpis, sheetsUrl: state.sheetsUrl }));
+}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+const pct  = (c,t) => Math.min(100, Math.round((c/t)*100));
+const scol = (p)   => p>=80 ? 'var(--ok)' : p>=50 ? 'var(--warn)' : 'var(--err)';
+const slbl = (p)   => p>=80 ? '達標中 ✓'  : p>=50 ? '進行中'      : '需加速';
+const today = ()   => new Date().toISOString().slice(0,10);
+const fmtN  = (n,u) => (u==='元'&&n>=10000) ? `${(n/10000).toFixed(1)}萬` : Number(n).toLocaleString('zh-TW');
+
+function daysLeft(deadline) {
+  if (!deadline) return null;
+  return Math.ceil((new Date(deadline) - new Date()) / 86400000);
+}
+function weeklyNeeded(kpi) {
+  const dl = daysLeft(kpi.deadline);
+  if (!dl || dl <= 0) return null;
+  const gap = kpi.target - kpi.current;
+  if (gap <= 0) return 0;
+  return Math.ceil(gap / (dl/7));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ════════════════════════════════════════════════
+//  SPARKLINE SVG
+// ════════════════════════════════════════════════
+function sparklineSVG(history, color) {
+  if (!history || history.length < 2) return '';
+  const vals = history.map(h => h.v ?? h.val ?? 0);
+  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+  const W=110, H=34, pad=4;
+  const pts = vals.map((v,i) => {
+    const x = pad + (i/(vals.length-1))*(W-pad*2);
+    const y = H - pad - ((v-min)/range)*(H-pad*2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const last = vals.length-1;
+  const lx = pad + (W-pad*2);
+  const ly = H - pad - ((vals[last]-min)/range)*(H-pad*2);
+  return `<svg width="${W}" height="${H}" style="overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="${color}"/>
+  </svg>`;
+}
+
+// ════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════
+function render() {
+  saveState();
+  renderHeader();
+  renderFilters();
+  renderCards();
+  renderSheetsBanner();
+}
+
+function renderHeader() {
+  const kpis = state.filter === '全部'
+    ? state.kpis
+    : state.kpis.filter(k => k.category === state.filter);
+  if (!kpis.length) return;
+  const avg      = Math.round(kpis.reduce((s,k)=>s+pct(k.current,k.target),0)/kpis.length);
+  const onTrack  = kpis.filter(k=>pct(k.current,k.target)>=80).length;
+  const needsAttn= kpis.filter(k=>pct(k.current,k.target)<50).length;
+  const catLabel = state.filter === '全部' ? '' : ` · ${state.filter}`;
+  document.getElementById('s-overall').textContent = avg+'%';
+  document.getElementById('s-ontrack').textContent = `${onTrack}/${kpis.length}`;
+  document.getElementById('s-attn').textContent    = `${needsAttn} 項`;
+  document.getElementById('s-cat-label').textContent = catLabel;
+}
+
+function renderFilters() {
+  const cats = ['全部', ...Array.from(new Set(state.kpis.map(k=>k.category)))];
+  const bar  = document.getElementById('filter-bar');
+  bar.innerHTML = cats.map(c =>
+    `<button class="filter-btn ${state.filter===c?'active':''}" onclick="setFilter('${c}')">${c}</button>`
+  ).join('');
+}
+
+function renderCards() {
+  const visible = state.filter==='全部'
+    ? state.kpis
+    : state.kpis.filter(k=>k.category===state.filter);
+  const grid = document.getElementById('kpi-grid');
+  if (!visible.length) {
+    grid.innerHTML = '<div class="empty">此類別尚無指標，點右上角新增！</div>';
+    return;
+  }
+  grid.innerHTML = visible.map(k => cardHTML(k)).join('');
+}
+
+function cardHTML(k) {
+  const p   = pct(k.current, k.target);
+  const col = scol(p);
+  const R=72, S=8, r=(R-S)/2, circ=2*Math.PI*r, dash=(p/100)*circ;
+  const dl  = daysLeft(k.deadline);
+  const wk  = weeklyNeeded(k);
+
+  const deadlineRow = k.deadline ? `
+    <div class="kpi-deadline">
+      <span>📅 截止 ${k.deadline}
+        <span class="deadline-days" style="color:${dl<=14?'var(--err)':'var(--muted)'}">
+          ${dl>0?`還有 ${dl} 天`:'已到期'}
+        </span>
+      </span>
+      <span class="deadline-weekly">
+        ${wk===0?'🎉 已達標！':wk?`每週需 +${fmtN(wk,k.unit)}`:''}
+      </span>
+    </div>` : '';
+
+  return `
+  <div class="kpi-card">
+    <div class="kpi-card-top">
+      <div>
+        <div class="kpi-category">${k.category}</div>
+        <div class="kpi-name">${k.icon} ${k.name}</div>
+      </div>
+      <div class="kpi-actions">
+        <button class="kpi-icon-btn" onclick="openEditModal(${k.id})" title="編輯">✏️</button>
+        <button class="kpi-icon-btn" onclick="deleteKPI(${k.id})" title="刪除">🗑️</button>
+      </div>
+    </div>
+
+    <div class="kpi-body">
+      <div class="ring-wrap">
+        <svg width="${R}" height="${R}">
+          <circle cx="${R/2}" cy="${R/2}" r="${r}" fill="none" stroke="var(--rose-p)" stroke-width="${S}"/>
+          <circle cx="${R/2}" cy="${R/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${S}"
+            stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-linecap="round"
+            transform="rotate(-90 ${R/2} ${R/2})" style="transition:stroke-dasharray .8s ease"/>
+        </svg>
+        <div class="ring-pct" style="color:${col}">${p}%</div>
+      </div>
+      <div class="kpi-nums">
+        <div class="kpi-current">${fmtN(k.current,k.unit)}<span class="kpi-unit">${k.unit}</span></div>
+        <div class="kpi-target">目標 ${fmtN(k.target,k.unit)} ${k.unit}</div>
+        <div class="kpi-badge" style="color:${col};background:${col}22">${slbl(p)}</div>
+      </div>
+      <div class="sparkline-wrap">
+        ${sparklineSVG(k.history, col)}
+        <div class="spark-lbl">趨勢</div>
+      </div>
+    </div>
+
+    <div class="kpi-bar-bg">
+      <div class="kpi-bar-fill" style="width:${p}%;background:linear-gradient(90deg,var(--rose-l),${col})"></div>
+    </div>
+
+    ${deadlineRow}
+
+    <button class="btn-update" onclick="openUpdateModal(${k.id})">📝 更新進度</button>
+  </div>`;
+}
+
+function renderSheetsBanner() {
+  const banner = document.getElementById('sheets-banner');
+  const status = document.getElementById('sheets-status');
+  if (state.sheetsUrl) {
+    banner.className = 'sheets-banner connected';
+    status.textContent = '✅ 已連接 Google Sheets';
+  } else {
+    banner.className = 'sheets-banner';
+    status.textContent = '⚠️ 尚未連接 Google Sheets — 資料僅存本機';
+  }
+}
+
+function setFilter(f) { state.filter = f; render(); }
+
+// ════════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// Icon picker
+function buildIconPicker(selected) {
+  selectedIcon = selected || '📊';
+  document.getElementById('icon-picker').innerHTML = ICONS.map(ic =>
+    `<button class="icon-opt ${ic===selectedIcon?'active':''}" onclick="selectIcon('${ic}')">${ic}</button>`
+  ).join('');
+}
+function selectIcon(ic) {
+  selectedIcon = ic;
+  document.querySelectorAll('.icon-opt').forEach(b => {
+    b.classList.toggle('active', b.textContent === ic);
+  });
+}
+
+// Add Modal
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-kpi-title').textContent = '＋ 新增 KPI 指標';
+  ['category','name','target','current','unit','deadline'].forEach(f =>
+    document.getElementById('f-'+f).value = '');
+  buildIconPicker('📊');
+  document.getElementById('modal-kpi').style.display = 'flex';
+}
+
+// Edit Modal
+function openEditModal(id) {
+  const k = state.kpis.find(x=>x.id===id);
+  if (!k) return;
+  editingId = id;
+  document.getElementById('modal-kpi-title').textContent = '✏️ 編輯 KPI 指標';
+  document.getElementById('f-category').value = k.category;
+  document.getElementById('f-name').value     = k.name;
+  document.getElementById('f-target').value   = k.target;
+  document.getElementById('f-current').value  = k.current;
+  document.getElementById('f-unit').value     = k.unit;
+  document.getElementById('f-deadline').value = k.deadline||'';
+  buildIconPicker(k.icon);
+  document.getElementById('modal-kpi').style.display = 'flex';
+}
+
+function saveKPI() {
+  const cat  = document.getElementById('f-category').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  const tgt  = +document.getElementById('f-target').value;
+  const cur  = +document.getElementById('f-current').value;
+  const unit = document.getElementById('f-unit').value.trim();
+  const dl   = document.getElementById('f-deadline').value;
+  if (!cat||!name||!tgt) { showToast('⚠️ 請填寫類別、名稱與目標值'); return; }
+
+  if (editingId) {
+    const updated = {...state.kpis.find(k=>k.id===editingId), category:cat, name, target:tgt, current:cur, unit, deadline:dl, icon:selectedIcon};
+    state.kpis = state.kpis.map(k => k.id===editingId ? updated : k);
+    sheetsWrite({action:'edit', id:editingId, category:cat, name, target:tgt, current:cur, unit, deadline:dl, icon:selectedIcon});
+    showToast('✅ 指標已更新');
+  } else {
+    const newId = Date.now();
+    const kpi   = {id:newId, category:cat, name, target:tgt, current:cur, unit, deadline:dl, icon:selectedIcon,
+                   history:[{d:today(), v:cur}]};
+    state.kpis.push(kpi);
+    sheetsWrite({action:'add', ...kpi});
+    showToast('✅ 新指標已新增');
+  }
+  closeModal('modal-kpi');
+  render();
+}
+
+// Update Modal
+function openUpdateModal(id) {
+  const k = state.kpis.find(x=>x.id===id);
+  if (!k) return;
+  updatingId = id;
+  document.getElementById('update-kpi-name').textContent = k.icon+' '+k.name;
+  document.getElementById('update-unit-label').textContent = `目前值（${k.unit}）`;
+  document.getElementById('f-update-val').value = k.current;
+  document.getElementById('modal-update').style.display = 'flex';
+}
+function confirmUpdate() {
+  const newVal = +document.getElementById('f-update-val').value;
+  state.kpis = state.kpis.map(k => {
+    if (k.id !== updatingId) return k;
+    const hist = [...(k.history||[])];
+    const todayStr = today();
+    if (hist.length && hist[hist.length-1].d === todayStr) hist[hist.length-1].v = newVal;
+    else hist.push({d:todayStr, v:newVal});
+    return {...k, current:newVal, history:hist};
+  });
+  const k = state.kpis.find(x=>x.id===updatingId);
+  sheetsWrite({action:'update', id:updatingId, current:newVal});
+  showToast(`📈 ${k.name} 已更新為 ${newVal}`);
+  closeModal('modal-update');
+  render();
+}
+
+// Delete
+function deleteKPI(id) {
+  if (!confirm('確定刪除這個指標？')) return;
+  sheetsWrite({action:'delete', id});
+  state.kpis = state.kpis.filter(k=>k.id!==id);
+  showToast('🗑️ 指標已刪除');
+  render();
+}
+
+// ════════════════════════════════════════════════
+//  GOOGLE SHEETS
+// ════════════════════════════════════════════════
+function openSheetsModal() {
+  document.getElementById('f-sheets-url').value = state.sheetsUrl || '';
+  document.getElementById('modal-sheets').style.display = 'flex';
+}
+function saveSheetsCfg() {
+  const url = document.getElementById('f-sheets-url').value.trim();
+  if (!url) { showToast('⚠️ 請輸入 Apps Script URL'); return; }
+  state.sheetsUrl = url;
+  saveState();
+  syncFromSheets(true);
+  closeModal('modal-sheets');
+}
+function copyScript() {
+  const code = document.getElementById('apps-script-code').value;
+  navigator.clipboard.writeText(code).then(()=>showToast('✅ 程式碼已複製'));
+}
+
+// Read from Sheets
+async function syncFromSheets(isSetup=false) {
+  if (!state.sheetsUrl) { openSheetsModal(); return; }
+  showToast('☁️ 正在從 Sheets 讀取…');
+  try {
+    const url  = state.sheetsUrl + (state.sheetsUrl.includes('?')?'&':'?') + '_t='+Date.now();
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (json.status !== 'ok') throw new Error('回應錯誤');
+    // Merge: Sheets is source of truth for target/current/deadline
+    const sheetMap = {};
+    json.data.forEach(row => { sheetMap[String(row.id)] = row; });
+    state.kpis = state.kpis.map(k => {
+      const s = sheetMap[String(k.id)];
+      if (!s) return k;
+      const newVal = +s.current;
+      const hist = [...(k.history||[])];
+      if (hist.length===0 || hist[hist.length-1].v !== newVal) {
+        hist.push({d:today(), v:newVal});
+      }
+      return {...k, target:+s.target, current:newVal, deadline:s.deadline||k.deadline, history:hist};
+    });
+    // Add rows from Sheets that don't exist locally
+    json.data.forEach(row => {
+      if (!state.kpis.find(k=>String(k.id)===String(row.id))) {
+        state.kpis.push({
+          id:row.id, category:row.category, name:row.name,
+          target:+row.target, current:+row.current,
+          unit:row.unit, deadline:row.deadline, icon:row.icon||'📊',
+          history:[{d:today(),v:+row.current}]
+        });
+      }
+    });
+    showToast('✅ 已從 Sheets 同步最新數據');
+    render();
+  } catch(e) {
+    console.error(e);
+    showToast('❌ 連線失敗，請確認 URL 與部署設定');
+  }
+}
+
+// Write to Sheets
+async function sheetsWrite(payload) {
+  if (!state.sheetsUrl) return;
+  try {
+    await fetch(state.sheetsUrl, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { console.warn('Sheets write failed:', e); }
+}
+
+// ════════════════════════════════════════════════
+//  AI REPORT
+// ════════════════════════════════════════════════
+async function openReportModal() {
+  document.getElementById('modal-report').style.display = 'flex';
+  document.getElementById('report-actions').style.display = 'none';
+  document.getElementById('report-content').innerHTML = `
+    <div class="loading-spin"><span class="spinner">⟳</span>AI 正在分析您的事業數據…</div>`;
+  reportText = '';
+
+  const summary = state.kpis.map(k => {
+    const p = pct(k.current, k.target);
+    return `・${k.name}：目前 ${fmtN(k.current,k.unit)} ${k.unit}，目標 ${fmtN(k.target,k.unit)} ${k.unit}，達成率 ${p}%（${slbl(p)}）`;
+  }).join('\n');
+
+  const prompt = `你是圈圈的個人目標助理。以下是本週各目標數據，請用繁體中文撰寫一份溫暖且有力的週報摘要（約 250 字），包含：
+1. 整體進度一句話總結
+2. 表現最好的 2 個目標（具體說明亮點）
+3. 需要加速的 2 個目標（給出具體可執行的行動建議）
+4. 給圈圈的一句激勵話語
+
+目標數據：
+${summary}
+
+座右銘：「只要向前行，人生總有無限可能。」`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{role:'user', content:prompt}]
+      })
+    });
+    const data = await resp.json();
+    reportText = (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('') || '無法生成報告。';
+  } catch(e) {
+    reportText = '⚠️ 連線失敗，請稍後再試。\n\n（提示：本頁需部署在有 Anthropic API 存取權限的環境才能使用 AI 週報功能。）';
+  }
+
+  document.getElementById('report-content').innerHTML =
+    `<div class="report-body">${reportText}</div>`;
+  document.getElementById('report-actions').style.display = 'flex';
+}
+function copyReport() {
+  navigator.clipboard.writeText(reportText).then(()=>showToast('📋 週報已複製'));
+}
+
+// ════════════════════════════════════════════════
+//  EXPORT CSV
+// ════════════════════════════════════════════════
+function exportCSV() {
+  const rows = [['類別','指標','目前值','目標值','單位','達成率%','截止日期','狀態','最後更新']];
+  state.kpis.forEach(k => {
+    const h = k.history||[];
+    const lastDate = h.length ? h[h.length-1].d : '—';
+    rows.push([k.category,k.name,k.current,k.target,k.unit,pct(k.current,k.target),k.deadline||'—',slbl(pct(k.current,k.target)),lastDate]);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `好圈圈KPI_${today()}.csv`;
+  a.click();
+  showToast('📥 CSV 已下載');
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+loadState();
+render();
+</script>
+</body>
+</html>
